@@ -506,7 +506,7 @@ def main():
     del sys.argv[0]  # Hide 'statprof' from argument list
 
     # Replace statprof's dir with script's dir in front of module search path
-    sys.path[0] = os.path.dirname(scriptfile)
+    sys.path[0] = os.path.dirname(os.path.realpath(scriptfile))
 
     with profile():
         execfile(scriptfile)
