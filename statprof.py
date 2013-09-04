@@ -490,6 +490,16 @@ def display_by_method(stats, fp):
                     source))
 
 
+def _runscript(filename):
+    import __main__
+    __main__.__dict__.clear()
+    __main__.__dict__.update({
+        "__name__": "__main__",
+        "__file__": filename,
+        "__builtins__": __builtins__,
+    })
+    execfile(filename)
+
 def main():
     '''Run the given script under the profiler, when invoked as a module
     (python -m statprof ...), and display the profile report once done.
@@ -509,7 +519,8 @@ def main():
     sys.path[0] = os.path.dirname(os.path.realpath(scriptfile))
 
     with profile():
-        execfile(scriptfile)
+        _runscript(scriptfile)
 
 if __name__ == '__main__':
-    main()
+    import statprof
+    statprof.main()
