@@ -105,6 +105,7 @@ main thread's work patterns.
 """
 
 import os
+import runpy
 import signal
 import sys
 
@@ -500,6 +501,7 @@ def _runscript(filename):
     })
     execfile(filename)
 
+
 def main():
     '''Run the given script under the profiler, when invoked as a module
     (python -m statprof ...), and display the profile report once done.
@@ -509,17 +511,28 @@ def main():
         sys.exit(2)
 
     scriptfile = sys.argv[1]
-    if not os.path.exists(scriptfile):
-        print('Error: %s does not exist' % (scriptfile,))
-        sys.exit(1)
+    if scriptfile.startswith("-m"):
+        if scriptfile == "-m":
+            scriptfile = sys.argv[2]
+            del sys.argv[1:3]
+        else:
+            scriptfile = scriptfile[2:]
+            del sys.argv[1]
+        with profile():
+            runpy.run_module(scriptfile, run_name="__main__", alter_sys=True)
 
-    del sys.argv[0]  # Hide 'statprof' from argument list
+    else:
+        if not os.path.exists(scriptfile):
+            print('Error: %s does not exist' % (scriptfile,))
+            sys.exit(1)
 
-    # Replace statprof's dir with script's dir in front of module search path
-    sys.path[0] = os.path.dirname(os.path.realpath(scriptfile))
+        del sys.argv[0]  # Hide 'statprof' from argument list
 
-    with profile():
-        _runscript(scriptfile)
+        # Replace statprof's dir with script's dir in front of module search path
+        sys.path[0] = os.path.dirname(os.path.realpath(scriptfile))
+
+        with profile():
+            _runscript(scriptfile)
 
 if __name__ == '__main__':
     import statprof
