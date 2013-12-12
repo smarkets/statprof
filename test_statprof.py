@@ -1,7 +1,7 @@
-from mock import Mock, patch
+from mock import Mock
 from nose.tools import eq_, ok_
 
-from statprof import CodeKey, stop
+from statprof import CodeKey, ProfileState
 
 
 def create_frame(filename, lineno, name):
@@ -64,10 +64,10 @@ def test_code_key_get_method_reuses_instances():
 
 
 def test_stop_fails_if_profiling_isnt_running():
-    with patch('statprof.state', profile_level=0):
-        try:
-            stop()
-        except Exception:
-            pass
-        else:
-            raise Exception('Call above should have failed')
+    state = ProfileState()
+    try:
+        state.stop()
+    except Exception:
+        pass
+    else:
+        raise Exception('Call above should have failed')

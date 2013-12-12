@@ -125,9 +125,14 @@ def clock():
 
 class ProfileState(object):
     def __init__(self, frequency=None):
+        self.profile_level = 0
         self.reset(frequency)
 
+    def is_active(self):
+        return self.profile_level > 0
+
     def reset(self, frequency=None):
+        assert self.profile_level == 0, "Can't reset() while statprof is running"
         # total so far
         self.accumulated_time = 0.0
         # start_time when timer is active
@@ -153,6 +158,29 @@ class ProfileState(object):
 
     def accumulate_time(self, stop_time):
         self.accumulated_time += stop_time - self.last_start_time
+
+    def start(self):
+        state.profile_level += 1
+
+        if state.profile_level == 1:
+            self.last_start_time = clock()
+            rpt = self.remaining_prof_time
+            self.remaining_prof_time = None
+            signal.signal(signal.SIGPROF, profile_signal_handler)
+            signal.setitimer(signal.ITIMER_PROF, rpt or self.sample_interval, 0.0)
+            self.gc_time_taken = 0  # dunno
+
+    def stop(self):
+        assert self.profile_level > 0, 'statprof is not running'
+        self.profile_level -= 1
+        if self.profile_level == 0:
+            self.accumulate_time(clock())
+            self.last_start_time = None
+            rpt = signal.setitimer(signal.ITIMER_PROF, 0.0, 0.0)
+            signal.signal(signal.SIGPROF, signal.SIG_IGN)
+            self.remaining_prof_time = rpt[0]
+            self.gc_time_taken = 0  # dunno
+
 
 state = ProfileState()
 
@@ -253,32 +281,17 @@ def profile_signal_handler(signum, frame):
 ## Profiling API
 
 def is_active():
-    return state.profile_level > 0
+    return state.is_active()
 
 
 def start():
     '''Install the profiling signal handler, and start profiling.'''
-    state.profile_level += 1
-    if state.profile_level == 1:
-        state.last_start_time = clock()
-        rpt = state.remaining_prof_time
-        state.remaining_prof_time = None
-        signal.signal(signal.SIGPROF, profile_signal_handler)
-        signal.setitimer(signal.ITIMER_PROF, rpt or state.sample_interval, 0.0)
-        state.gc_time_taken = 0  # dunno
+    state.start()
 
 
 def stop():
     '''Stop profiling, and uninstall the profiling signal handler.'''
-    assert state.profile_level > 0, 'statprof is not running'
-    state.profile_level -= 1
-    if state.profile_level == 0:
-        state.accumulate_time(clock())
-        state.last_start_time = None
-        rpt = signal.setitimer(signal.ITIMER_PROF, 0.0, 0.0)
-        signal.signal(signal.SIGPROF, signal.SIG_IGN)
-        state.remaining_prof_time = rpt[0]
-        state.gc_time_taken = 0  # dunno
+    state.stop()
 
 
 def reset(frequency=None):
@@ -287,10 +300,9 @@ def reset(frequency=None):
 
     The optional frequency argument specifies the number of samples to
     collect per second.'''
-    assert state.profile_level == 0, "Can't reset() while statprof is running"
+    state.reset(frequency)
     CallData.all_calls.clear()
     CodeKey.cache.clear()
-    state.reset(frequency)
 
 
 @contextmanager
