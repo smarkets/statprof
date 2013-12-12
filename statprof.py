@@ -378,12 +378,15 @@ def display(fp=None, format=DisplayFormat.BY_LINE, path_format=PathFormat.FULL_P
         for stat in stats:
             stat.filename = path_transformation(stat.filename)
 
-    if format == DisplayFormat.BY_LINE:
-        display_by_line(stats, fp)
-    elif format == DisplayFormat.BY_METHOD:
-        display_by_method(stats, fp)
-    else:
+    try:
+        method = {
+            DisplayFormat.BY_LINE: display_by_line,
+            DisplayFormat.BY_METHOD: display_by_method
+        }[format]
+    except KeyError:
         raise Exception("Invalid display format")
+
+    method(stats, fp)
 
     print >> fp, ('---')
     print >> fp, ('Sample count: %d' % state.sample_count)
