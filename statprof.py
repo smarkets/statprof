@@ -327,13 +327,10 @@ class CallStats(object):
         cum_samples = call_data.cum_sample_count
         nsamples = state.sample_count
         secs_per_sample = state.accumulated_time / nsamples
-        basename = os.path.basename(call_data.key.filename)
 
         self.lineno = call_data.key.lineno
-        self.filepath = call_data.key.filename
-        self.filename = basename
+        self.filename = call_data.key.filename
         self.function = call_data.key.name
-        self.name = '%s:%d:%s' % (self.filename, self.lineno, self.function)
         self.pcnt_time_in_proc = self_samples / nsamples * 100
         self.cum_secs_in_proc = cum_samples * secs_per_sample
         self.self_secs_in_proc = self_samples * secs_per_sample
@@ -341,20 +338,24 @@ class CallStats(object):
         self.self_secs_per_call = None
         self.cum_secs_per_call = None
 
-    def display(self, fp):
-        print >> fp, ('%6.2f %9.2f %9.2f  %s' % (self.pcnt_time_in_proc,
-                                                 self.cum_secs_in_proc,
-                                                 self.self_secs_in_proc,
-                                                 self.name))
-
 
 class DisplayFormat:
     BY_LINE = 0
     BY_METHOD = 1
 
 
-def display(fp=None, format=DisplayFormat.BY_LINE):
-    '''Print statistics, either to stdout or the given file object.'''
+class PathFormat:
+    FULL_PATH = 0
+    FILENAME_ONLY = 1
+    NO_FORMATTING = 2
+
+
+def display(fp=None, format=DisplayFormat.BY_LINE, path_format=PathFormat.FULL_PATH):
+    '''Print statistics, either to stdout or the given file object.
+
+    :type format: One of :class:`DisplayFormat.BY_*` constants
+    :param all_paths_absolute: Print all the file names with full paths.
+    '''
 
     if fp is None:
         import sys
@@ -363,10 +364,24 @@ def display(fp=None, format=DisplayFormat.BY_LINE):
         print >> fp, ('No samples recorded.')
         return
 
+    stats = [CallStats(x) for x in CallData.all_calls.itervalues()]
+
+    try:
+        path_transformation = {
+            PathFormat.FULL_PATH: os.path.abspath,
+            PathFormat.FILENAME_ONLY: os.path.basename,
+            PathFormat.NO_FORMATTING: lambda path: path
+        }[path_format]
+    except KeyError:
+        raise Exception("Invalid path format")
+    else:
+        for stat in stats:
+            stat.filename = path_transformation(stat.filename)
+
     if format == DisplayFormat.BY_LINE:
-        display_by_line(fp)
+        display_by_line(stats, fp)
     elif format == DisplayFormat.BY_METHOD:
-        display_by_method(fp)
+        display_by_method(stats, fp)
     else:
         raise Exception("Invalid display format")
 
@@ -375,19 +390,20 @@ def display(fp=None, format=DisplayFormat.BY_LINE):
     print >> fp, ('Total time: %f seconds' % state.accumulated_time)
 
 
-def display_by_line(fp):
+def display_by_line(stats, fp):
     '''Print the profiler data with each sample line represented
     as one row in a table.  Sorted by self-time per line.'''
-    l = [CallStats(x) for x in CallData.all_calls.itervalues()]
-    l.sort(reverse=True, key=lambda x: x.self_secs_in_proc)
+    stats.sort(reverse=True, key=lambda x: x.self_secs_in_proc)
 
     print >> fp, ('%5.5s %10.10s   %7.7s  %-8.8s' %
                   ('%  ', 'cumulative', 'self', ''))
     print >> fp, ('%5.5s  %9.9s  %8.8s  %-8.8s' %
                   ("time", "seconds", "seconds", "name"))
 
-    for x in l:
-        x.display(fp)
+    for x in stats:
+        print >> fp, ('%6.2f %9.2f %9.2f  %s' % (
+            x.pcnt_time_in_proc, x.cum_secs_in_proc, x.self_secs_in_proc,
+            '%s:%d:%s' % (x.filename, x.lineno, x.function)))
 
 
 def get_line_source(filename, lineno):
@@ -408,7 +424,7 @@ def get_line_source(filename, lineno):
     return ""
 
 
-def display_by_method(fp):
+def display_by_method(stats, fp):
     '''Print the profiler data with each sample function represented
     as one row in a table.  Important lines within that function are
     output as nested rows.  Sorted by self-time per line.'''
@@ -417,10 +433,8 @@ def display_by_method(fp):
     print >> fp, ('%5.5s  %9.9s  %8.8s  %-8.8s' %
                   ("time", "seconds", "seconds", "name"))
 
-    calldata = [CallStats(x) for x in CallData.all_calls.itervalues()]
-
     grouped = defaultdict(list)
-    for call in calldata:
+    for call in stats:
         grouped[call.filename + ":" + call.function].append(call)
 
     # compute sums for each function
@@ -451,7 +465,7 @@ def display_by_method(fp):
         for call in function[4]:
             # only show line numbers for significant locations ( > 1% time spent)
             if call.pcnt_time_in_proc > 1:
-                source = get_line_source(call.filepath, call.lineno).strip()
+                source = get_line_source(call.filename, call.lineno).strip()
                 if len(source) > 25:
                     source = source[:20] + "..."
 

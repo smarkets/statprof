@@ -1,7 +1,17 @@
+try:
+    from cStringIO import StringIO
+except ImportError:
+    try:
+        from StringIO import StringIO
+    except ImportError:
+        from io import StringIO  # noqa
+
+from os.path import abspath, basename
+
 from mock import Mock
 from nose.tools import eq_, ok_
 
-from statprof import CodeKey, ProfileState
+from statprof import CodeKey, display, DisplayFormat, PathFormat, ProfileState, start, stop
 
 
 def create_frame(filename, lineno, name):
@@ -14,6 +24,13 @@ def create_frame(filename, lineno, name):
     frame.f_lineno = lineno
 
     return frame
+
+
+def get_output(**kwargs):
+    buffer = StringIO()
+    display(buffer, **kwargs)
+    buffer.seek(0)
+    return buffer.read()
 
 
 def neq(a, b, msg=None):
@@ -71,3 +88,29 @@ def test_stop_fails_if_profiling_isnt_running():
         pass
     else:
         raise Exception('Call above should have failed')
+
+
+def test_profiling_output_contains_file_names_formatted_appropriately():
+    start()
+
+    def fun():
+        for i in range(2 ** 20):
+            pass
+
+    def fun2():
+        for i in range(50):
+            fun()
+
+    fun2()
+    stop()
+
+    for format in (DisplayFormat.BY_LINE, DisplayFormat.BY_METHOD):
+        full_path = abspath(__file__)
+        base = basename(__file__)
+
+        content = get_output(format=format, path_format=PathFormat.FULL_PATH)
+        assert full_path in content
+
+        content = get_output(format=format, path_format=PathFormat.FILENAME_ONLY)
+        assert base in content
+        assert full_path not in content
