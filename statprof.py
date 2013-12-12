@@ -258,6 +258,7 @@ def start():
 
 def stop():
     '''Stop profiling, and uninstall the profiling signal handler.'''
+    assert state.profile_level > 0, 'statprof is not running'
     state.profile_level -= 1
     if state.profile_level == 0:
         state.accumulate_time(clock())
