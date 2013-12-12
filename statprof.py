@@ -206,6 +206,9 @@ class CallData(object):
     __slots__ = ('key', 'call_count', 'cum_sample_count', 'self_sample_count')
 
     def __init__(self, key):
+        '''
+        :type key: :class:`CodeKey`
+        '''
         self.key = key
         self.call_count = 0
         self.cum_sample_count = 0
@@ -307,6 +310,9 @@ def profile():
 
 class CallStats(object):
     def __init__(self, call_data):
+        '''
+        :type call_data: :class:`CallData`
+        '''
         self_samples = call_data.self_sample_count
         cum_samples = call_data.cum_sample_count
         nsamples = state.sample_count
