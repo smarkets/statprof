@@ -245,8 +245,7 @@ def profile_signal_handler(signum, frame):
     if state.profile_level > 0:
         state.accumulate_time(clock())
         sample_stack_procs(frame)
-        signal.setitimer(signal.ITIMER_PROF,
-            state.sample_interval, 0.0)
+        signal.setitimer(signal.ITIMER_PROF, state.sample_interval, 0.0)
         state.last_start_time = clock()
 
 
@@ -265,8 +264,7 @@ def start():
         rpt = state.remaining_prof_time
         state.remaining_prof_time = None
         signal.signal(signal.SIGPROF, profile_signal_handler)
-        signal.setitimer(signal.ITIMER_PROF,
-            rpt or state.sample_interval, 0.0)
+        signal.setitimer(signal.ITIMER_PROF, rpt or state.sample_interval, 0.0)
         state.gc_time_taken = 0  # dunno
 
 
@@ -379,6 +377,7 @@ def display_by_line(fp):
     for x in l:
         x.display(fp)
 
+
 def get_line_source(filename, lineno):
     '''Gets the line text for the line in the file.'''
     lineno -= 1
@@ -395,6 +394,7 @@ def get_line_source(filename, lineno):
             fp.close()
 
     return ""
+
 
 def display_by_method(fp):
     '''Print the profiler data with each sample function represented
@@ -421,8 +421,8 @@ def display_by_method(fp):
             total_cum_sec += sample.cum_secs_in_proc
             total_self_sec += sample.self_secs_in_proc
             total_percent += sample.pcnt_time_in_proc
-        functiondata.append((fname, 
-                             total_cum_sec, 
+        functiondata.append((fname,
+                             total_cum_sec,
                              total_self_sec,
                              total_percent,
                              samples))
@@ -431,10 +431,10 @@ def display_by_method(fp):
     functiondata.sort(reverse=True, key=lambda x: x[2])
 
     for function in functiondata:
-        print >> fp, ('%6.2f %9.2f %9.2f  %s' % (function[3], # total percent
-                                                 function[1], # total cum sec
-                                                 function[2], # total self sec
-                                                 function[0])) # file:function
+        print >> fp, ('%6.2f %9.2f %9.2f  %s' % (function[3],  # total percent
+                                                 function[1],  # total cum sec
+                                                 function[2],  # total self sec
+                                                 function[0]))  # file:function
         function[4].sort(reverse=True, key=lambda i: i.self_secs_in_proc)
         for call in function[4]:
             # only show line numbers for significant locations ( > 1% time spent)
@@ -443,7 +443,7 @@ def display_by_method(fp):
                 if len(source) > 25:
                     source = source[:20] + "..."
 
-                print >> fp, ('%33.0f%% %6.2f   line %s: %s' % (call.pcnt_time_in_proc, 
+                print >> fp, ('%33.0f%% %6.2f   line %s: %s' % (call.pcnt_time_in_proc,
                                                                 call.self_secs_in_proc,
                                                                 call.lineno,
                                                                 source))
