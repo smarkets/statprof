@@ -109,7 +109,7 @@ from collections import defaultdict
 from contextlib import contextmanager
 
 
-__all__ = ['start', 'stop', 'reset', 'display', 'profile']
+__all__ = ['DisplayFormat', 'start', 'stop', 'reset', 'display', 'profile']
 
 
 ###########################################################################
@@ -320,12 +320,12 @@ class CallStats(object):
                                                  self.name))
 
 
-class DisplayFormats:
-    ByLine = 0
-    ByMethod = 1
+class DisplayFormat:
+    BY_LINE = 0
+    BY_METHOD = 1
 
 
-def display(fp=None, format=0):
+def display(fp=None, format=DisplayFormat.BY_LINE):
     '''Print statistics, either to stdout or the given file object.'''
 
     if fp is None:
@@ -335,9 +335,9 @@ def display(fp=None, format=0):
         print >> fp, ('No samples recorded.')
         return
 
-    if format == DisplayFormats.ByLine:
+    if format == DisplayFormat.BY_LINE:
         display_by_line(fp)
-    elif format == DisplayFormats.ByMethod:
+    elif format == DisplayFormat.BY_METHOD:
         display_by_method(fp)
     else:
         raise Exception("Invalid display format")
