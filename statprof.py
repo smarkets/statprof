@@ -162,21 +162,32 @@ class CodeKey(object):
 
     __slots__ = ('filename', 'lineno', 'name')
 
-    def __init__(self, frame):
+    def __init__(self, filename, lineno, name):
+        self.filename = filename
+        self.lineno = lineno
+        self.name = name
+
+    @classmethod
+    def create_from_frame(cls, frame):
         code = frame.f_code
-        self.filename = code.co_filename
-        self.lineno = frame.f_lineno
-        self.name = code.co_name
+        return cls(code.co_filename, frame.f_lineno, code.co_name)
 
     def __eq__(self, other):
         try:
             return (self.lineno == other.lineno and
-                    self.filename == other.filename)
+                    self.filename == other.filename and
+                    self.name == other.name)
         except:
             return False
 
     def __hash__(self):
-        return hash((self.lineno, self.filename))
+        return hash((self.lineno, self.filename, self.name))
+
+    def __repr__(self):
+        return '%s(%s)' % (
+            self.__class__.__name__,
+            ', '.join('%r' % getattr(self, k) for k in self.__slots__)
+        )
 
     @classmethod
     def get(cls, frame):
@@ -184,7 +195,7 @@ class CodeKey(object):
         try:
             return cls.cache[k]
         except KeyError:
-            v = cls(frame)
+            v = cls.create_from_frame(frame)
             cls.cache[k] = v
             return v
 
