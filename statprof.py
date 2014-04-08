@@ -108,6 +108,8 @@ import signal
 from collections import defaultdict
 from contextlib import contextmanager
 
+from six import iteritems, itervalues
+
 
 __all__ = ['DisplayFormat', 'start', 'stop', 'reset', 'display', 'profile']
 
@@ -364,7 +366,7 @@ def display(fp=None, format=DisplayFormat.BY_LINE, path_format=PathFormat.FULL_P
         print >> fp, ('No samples recorded.')
         return
 
-    stats = [CallStats(x) for x in CallData.all_calls.itervalues()]
+    stats = [CallStats(x) for x in itervalues(CallData.all_calls)]
 
     try:
         path_transformation = {
@@ -442,7 +444,7 @@ def display_by_method(stats, fp):
 
     # compute sums for each function
     functiondata = []
-    for fname, samples in grouped.iteritems():
+    for fname, samples in iteritems(grouped):
         total_cum_sec = 0
         total_self_sec = 0
         total_percent = 0
