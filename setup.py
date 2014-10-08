@@ -9,14 +9,14 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
-    name="statprof",
-    version="0.1.3",
-    author="Bryan O'Sullivan",
-    author_email="bos@serpentine.com",
+    name="statprof-smarkets",
+    version="0.2.0c1",
+    author="Smarkets",
+    author_email="support@smarkets.com",
     description="Statistical profiling for Python",
     license=read('LICENSE'),
     keywords="profiling",
-    url="http://packages.python.org/statprof",
+    url="https://github.com/smarkets/statprof",
     py_modules=['statprof'],
     long_description=read('README.rst'),
     classifiers=[

@@ -20,6 +20,21 @@ accurately.
     implementation and portability notes below for details.
 
 
+How to get it
+-------------
+
+Use pip!
+
+::
+
+    pip install statprof-smarkets
+
+Warning: it uses ``statprof`` as Python module name so this will conflict with
+original statprof installation if present.
+
+GitHub project page: https://github.com/smarkets/statprof
+PyPI page: https://pypi.python.org/pypi/statprof-smarkets
+
 Basic usage
 -----------
 
@@ -78,20 +93,21 @@ timing its own code.
 History
 -------
 
-This package was originally
-written and released by `Andy Wingo <http://wingolog.org/archives/2005/10/28/profiling>`_.
-It was ported to modern Python by Alex Frazer, and posted to github by
-Jeff Muizelaar.  The current maintainer is `Bryan O'Sullivan <bos@serpentine.com>`_.
+This package was originally written and released by
+`Andy Wingo <http://wingolog.org/archives/2005/10/28/profiling>`_.
+It was ported to modern Python by Alex Frazer, and posted to GitHub by
+Jeff Muizelaar. Maintained by `Bryan O'Sullivan <bos@serpentine.com>`_, was forked by
+Smarkets due to package not being maintaned anymore.
 
 
 Reporting bugs, contributing patches
 ------------------------------------
 
-The current maintainer of this package is `Bryan O'Sullivan <bos@serpentine.com>`_.
-
-Please report bugs using the `github issue tracker  <https://github.com/bos/statprof.py/issues>`_.
+Please report bugs using the `GitHub issue tracker  <https://github.com/smarkets/statprof/issues>`_.
 
 If you'd like to contribute patches, please do - the source is on
-github, so please just issue a pull request. ::
+GitHub, so please just issue a pull request.
 
-    $ git clone git://github.com/bos/statprof.py
+::
+
+    $ git clone git://github.com/smarkets/statprof

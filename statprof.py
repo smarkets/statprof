@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 """
+Copyright (C) 2014 Smarkets Limited <support@smarkets.com>
 Copyright (C) 2012 Bryan O'Sullivan <bos@serpentine.com>
 Copyright (C) 2011 Alex Fraser <alex at phatcore dot com>
 Copyright (C) 2004,2005 Andy Wingo <wingo at pobox dot com>
