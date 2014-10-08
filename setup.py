@@ -14,7 +14,7 @@ setup(
     author="Smarkets",
     author_email="support@smarkets.com",
     description="Statistical profiling for Python",
-    license='GPL 2, see LICENSE file',
+    license='LGPL 2, see LICENSE file',
     keywords=["profiling", "statistical profiling", "statprof"],
     url="https://github.com/smarkets/statprof",
     py_modules=['statprof'],
