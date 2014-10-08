@@ -1,6 +1,12 @@
 statprof - statistical profiling for Python
 ===========================================
 
+.. image:: https://travis-ci.org/smarkets/statprof.svg?branch=master
+    :target: https://travis-ci.org/smarkets/statprof
+
+.. image:: https://img.shields.io/pypi/v/statprof-smarkets.svg
+    :target: https://pypi.python.org/pypi/statprof-smarkets
+
 This package provides a simple statistical profiler for Python.
 
 Python's default profiler has been ``lsprof`` for several years. This is
@@ -33,29 +39,41 @@ Warning: it uses ``statprof`` as Python module name so this will conflict with
 original statprof installation if present.
 
 GitHub project page: https://github.com/smarkets/statprof
+
 PyPI page: https://pypi.python.org/pypi/statprof-smarkets
 
 Basic usage
 -----------
 
-It's easy to get started with ``statprof``: ::
+It's easy to get started with ``statprof``:
+
+.. code-block:: python
 
     import statprof
 
     statprof.start()
-	try:
-	    my_questionable_function()
+    try:
+        my_questionable_function()
     finally:
-	    statprof.stop()
-		statprof.display()
+        statprof.stop()
+        statprof.display()
 
-Or with a contextmanager : ::
+Or with a contextmanager:
+
+.. code-block:: python
 
     import statprof
     
     with statprof.profile():
         my_questionable_function()
 
+Or from command line:
+
+::
+
+    $ python -m statprof script.py
+    # or
+    $ python -m statprof -m script
 
 For more comprehensive help, run ``pydoc statprof``.
 
@@ -89,6 +107,18 @@ block.
 The profiler also tries (as much as possible) to avoid counting or
 timing its own code.
 
+Changelog
+---------
+
+0.2.0 (not released yet)
+````````````````````````
+
+* forked
+* refactored
+* added configurable display format (displays full paths by default now)
+* ability to run whole scripts under statprof from command line (thanks to
+  `Vincent Driessen <https://github.com/nvie>`_ and
+  `Antony Lee <https://github.com/anntzer>`_
 
 History
 -------
