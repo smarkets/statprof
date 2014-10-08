@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 """
 Copyright (C) 2012 Bryan O'Sullivan <bos@serpentine.com>
 Copyright (C) 2011 Alex Fraser <alex at phatcore dot com>
@@ -99,7 +102,6 @@ reporting function uses per-process timers, the results can be
 significantly off if other threads' work patterns are not similar to the
 main thread's work patterns.
 """
-from __future__ import division
 
 import os
 import signal
@@ -358,11 +360,14 @@ def display(fp=None, format=DisplayFormat.BY_LINE, path_format=PathFormat.FULL_P
     :param all_paths_absolute: Print all the file names with full paths.
     '''
 
+    def p(whatever):
+        print(whatever, file=fp)
+
     if fp is None:
         import sys
         fp = sys.stdout
     if state.sample_count == 0:
-        print >> fp, ('No samples recorded.')
+        p('No samples recorded.')
         return
 
     stats = [CallStats(x) for x in itervalues(CallData.all_calls)]
@@ -389,9 +394,9 @@ def display(fp=None, format=DisplayFormat.BY_LINE, path_format=PathFormat.FULL_P
 
     method(stats, fp)
 
-    print >> fp, ('---')
-    print >> fp, ('Sample count: %d' % state.sample_count)
-    print >> fp, ('Total time: %f seconds' % state.accumulated_time)
+    p('---')
+    p('Sample count: %d' % state.sample_count)
+    p('Total time: %f seconds' % state.accumulated_time)
 
 
 def display_by_line(stats, fp):
@@ -399,13 +404,14 @@ def display_by_line(stats, fp):
     as one row in a table.  Sorted by self-time per line.'''
     stats.sort(reverse=True, key=lambda x: x.self_secs_in_proc)
 
-    print >> fp, ('%5.5s %10.10s   %7.7s  %-8.8s' %
-                  ('%  ', 'cumulative', 'self', ''))
-    print >> fp, ('%5.5s  %9.9s  %8.8s  %-8.8s' %
-                  ("time", "seconds", "seconds", "name"))
+    def p(whatever):
+        print(whatever, file=fp)
+
+    p('%5.5s %10.10s   %7.7s  %-8.8s' % ('%  ', 'cumulative', 'self', ''))
+    p('%5.5s  %9.9s  %8.8s  %-8.8s' % ("time", "seconds", "seconds", "name"))
 
     for x in stats:
-        print >> fp, ('%6.2f %9.2f %9.2f  %s' % (
+        p('%6.2f %9.2f %9.2f  %s' % (
             x.pcnt_time_in_proc, x.cum_secs_in_proc, x.self_secs_in_proc,
             '%s:%d:%s' % (x.filename, x.lineno, x.function)))
 
@@ -432,10 +438,12 @@ def display_by_method(stats, fp):
     '''Print the profiler data with each sample function represented
     as one row in a table.  Important lines within that function are
     output as nested rows.  Sorted by self-time per line.'''
-    print >> fp, ('%5.5s %10.10s   %7.7s  %-8.8s' %
-                  ('%  ', 'cumulative', 'self', ''))
-    print >> fp, ('%5.5s  %9.9s  %8.8s  %-8.8s' %
-                  ("time", "seconds", "seconds", "name"))
+
+    def p(whatever):
+        print(whatever, file=fp)
+
+    p('%5.5s %10.10s   %7.7s  %-8.8s' % ('%  ', 'cumulative', 'self', ''))
+    p('%5.5s  %9.9s  %8.8s  %-8.8s' % ("time", "seconds", "seconds", "name"))
 
     grouped = defaultdict(list)
     for call in stats:
@@ -461,10 +469,11 @@ def display_by_method(stats, fp):
     functiondata.sort(reverse=True, key=lambda x: x[2])
 
     for function in functiondata:
-        print >> fp, ('%6.2f %9.2f %9.2f  %s' % (function[3],  # total percent
-                                                 function[1],  # total cum sec
-                                                 function[2],  # total self sec
-                                                 function[0]))  # file:function
+        p('%6.2f %9.2f %9.2f  %s' % (
+            function[3],  # total percent
+            function[1],  # total cum sec
+            function[2],  # total self sec
+            function[0]))  # file:function
         function[4].sort(reverse=True, key=lambda i: i.self_secs_in_proc)
         for call in function[4]:
             # only show line numbers for significant locations ( > 1% time spent)
@@ -473,7 +482,8 @@ def display_by_method(stats, fp):
                 if len(source) > 25:
                     source = source[:20] + "..."
 
-                print >> fp, ('%33.0f%% %6.2f   line %s: %s' % (call.pcnt_time_in_proc,
-                                                                call.self_secs_in_proc,
-                                                                call.lineno,
-                                                                source))
+                p('%33.0f%% %6.2f   line %s: %s' % (
+                    call.pcnt_time_in_proc,
+                    call.self_secs_in_proc,
+                    call.lineno,
+                    source))
