@@ -112,7 +112,7 @@ import sys
 from collections import defaultdict
 from contextlib import contextmanager
 
-from six import iteritems, itervalues
+from six import exec_, iteritems, itervalues
 
 
 __all__ = ['DisplayFormat', 'start', 'stop', 'reset', 'display', 'profile']
@@ -499,7 +499,9 @@ def _runscript(filename):
         "__file__": filename,
         "__builtins__": __builtins__,
     })
-    execfile(filename)
+    with open(filename) as f:
+        content = f.read()
+    exec_(content)
 
 
 def main():
