@@ -30,4 +30,5 @@ setup(
     install_requires=[
         'six>=1.5.0',
     ],
+    zip_safe=False,
 )
