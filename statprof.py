@@ -501,7 +501,7 @@ def _runscript(filename):
     })
     with open(filename) as f:
         content = f.read()
-    exec_(content)
+    exec_(content, globals(), {'__name__': '__main__'})
 
 
 def main():
