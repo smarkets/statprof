@@ -112,7 +112,7 @@ import sys
 from collections import defaultdict
 from contextlib import contextmanager
 
-from six import exec_, iteritems, itervalues
+from six import moves, exec_, iteritems, itervalues
 
 
 __all__ = ['DisplayFormat', 'start', 'stop', 'reset', 'display', 'profile']
@@ -491,29 +491,28 @@ def display_by_method(stats, fp):
                     source))
 
 
-def _runscript(filename):
-    import __main__
-    __main__.__dict__.clear()
-    __main__.__dict__.update({
-        "__name__": "__main__",
-        "__file__": filename,
-        "__builtins__": __builtins__,
-    })
-    with open(filename) as f:
-        content = f.read()
-    exec_(content, globals(), {'__name__': '__main__'})
-
-
 def main():
     '''Run the given script under the profiler, when invoked as a module
     (python -m statprof ...), and display the profile report once done.
     '''
     if not sys.argv[1:] or sys.argv[1] in ('--help', '-h'):
-        print('usage: python -m statprof <script> [<args>]')
+        print('usage: python -m statprof [-c cmd | -m mod | file] [<args>]')
         sys.exit(2)
 
     scriptfile = sys.argv[1]
-    if scriptfile.startswith("-m"):
+
+    if scriptfile.startswith("-c"):
+        del sys.argv[0]  # Hide 'statprof' from argument list
+        if scriptfile == "-c":
+            scriptfile = sys.argv[1]
+            del sys.argv[1]
+        else:
+            scriptfile = scriptfile[2:]
+            sys.argv[0] = "-c"
+        with profile():
+            exec_(scriptfile, vars(moves.builtins))
+
+    elif scriptfile.startswith("-m"):
         if scriptfile == "-m":
             scriptfile = sys.argv[2]
             del sys.argv[1:3]
@@ -524,17 +523,10 @@ def main():
             runpy.run_module(scriptfile, run_name="__main__", alter_sys=True)
 
     else:
-        if not os.path.exists(scriptfile):
-            print('Error: %s does not exist' % (scriptfile,))
-            sys.exit(1)
-
         del sys.argv[0]  # Hide 'statprof' from argument list
-
-        # Replace statprof's dir with script's dir in front of module search path
-        sys.path[0] = os.path.dirname(os.path.realpath(scriptfile))
-
         with profile():
-            _runscript(scriptfile)
+            runpy.run_path(scriptfile, run_name="__main__")
+
 
 if __name__ == '__main__':
     import statprof
