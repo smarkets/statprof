@@ -74,6 +74,8 @@ Or from command line:
     $ python -m statprof script.py
     # or
     $ python -m statprof -m script
+    # or (this may depend on bash because http://www.gnu.org/software/bash/manual/bashref.html#ANSI_002dC-Quoting)
+    $ python -m statprof -c "import hashlib"$'\n'"for i in range(10000): hashlib.md5(str(i)).hexdigest()"
 
 For more comprehensive help, run ``pydoc statprof``.
 
@@ -110,8 +112,8 @@ timing its own code.
 Changelog
 ---------
 
-0.2.0 (not released yet)
-````````````````````````
+0.2.0
+`````
 
 * forked
 * refactored
@@ -119,6 +121,8 @@ Changelog
 * ability to run whole scripts under statprof from command line (thanks to
   `Vincent Driessen <https://github.com/nvie>`_ and
   `Antony Lee <https://github.com/anntzer>`_
+* added support for ``python -mstatprof -c cmd`` invocation (thanks to
+  `Antony Lee <https://github.com/anntzer>`_)
 
 History
 -------
