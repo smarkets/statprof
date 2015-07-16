@@ -349,6 +349,9 @@ class DisplayFormat:
     BY_LINE = 0
     BY_METHOD = 1
 
+class DisplayOrder:
+    LOCAL = 0
+    CUMULATIVE = 1
 
 class PathFormat:
     FULL_PATH = 0
@@ -356,7 +359,7 @@ class PathFormat:
     NO_FORMATTING = 2
 
 
-def display(fp=None, format=DisplayFormat.BY_LINE, path_format=PathFormat.FULL_PATH):
+def display(fp=None, format=DisplayFormat.BY_LINE, path_format=PathFormat.FULL_PATH, order=DisplayOrder.LOCAL):
     '''Print statistics, either to stdout or the given file object.
 
     :type format: One of :class:`DisplayFormat.BY_*` constants
@@ -394,17 +397,26 @@ def display(fp=None, format=DisplayFormat.BY_LINE, path_format=PathFormat.FULL_P
     except KeyError:
         raise Exception("Invalid display format")
 
-    method(stats, fp)
+    method(stats, fp, order)
 
     p('---')
     p('Sample count: %d' % state.sample_count)
     p('Total time: %f seconds' % state.accumulated_time)
 
 
-def display_by_line(stats, fp):
+def display_by_line(stats, fp, order):
     '''Print the profiler data with each sample line represented
-    as one row in a table.  Sorted by self-time per line.'''
-    stats.sort(reverse=True, key=lambda x: x.self_secs_in_proc)
+    as one row in a table.'''
+
+    try:
+        sort_key = {
+            DisplayOrder.LOCAL: lambda x: x.self_secs_in_proc,
+            DisplayOrder.CUMULATIVE: lambda x: x.cum_secs_in_proc,
+        }[order]
+    except KeyError:
+        raise Exception("Invalid display order")
+
+    stats.sort(reverse=True, key=sort_key)
 
     def p(whatever):
         print(whatever, file=fp)
@@ -436,7 +448,7 @@ def get_line_source(filename, lineno):
     return ""
 
 
-def display_by_method(stats, fp):
+def display_by_method(stats, fp, order):
     '''Print the profiler data with each sample function represented
     as one row in a table.  Important lines within that function are
     output as nested rows.  Sorted by self-time per line.'''
@@ -467,8 +479,16 @@ def display_by_method(stats, fp):
                              total_percent,
                              samples))
 
+    try:
+        sort_key = {
+            DisplayOrder.LOCAL: lambda x: x[2],
+            DisplayOrder.CUMULATIVE: lambda x: x[1],
+        }[order]
+    except KeyError:
+        raise Exception("Invalid display order")
+
     # sort by total self sec
-    functiondata.sort(reverse=True, key=lambda x: x[2])
+    functiondata.sort(reverse=True, key=sort_key)
 
     for function in functiondata:
         p('%6.2f %9.2f %9.2f  %s' % (
