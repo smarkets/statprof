@@ -349,9 +349,11 @@ class DisplayFormat:
     BY_LINE = 0
     BY_METHOD = 1
 
+
 class DisplayOrder:
     LOCAL = 0
     CUMULATIVE = 1
+
 
 class PathFormat:
     FULL_PATH = 0
@@ -359,7 +361,12 @@ class PathFormat:
     NO_FORMATTING = 2
 
 
-def display(fp=None, format=DisplayFormat.BY_LINE, path_format=PathFormat.FULL_PATH, order=DisplayOrder.LOCAL):
+def display(
+    fp=None,
+    format=DisplayFormat.BY_LINE,
+    path_format=PathFormat.FULL_PATH,
+    order=DisplayOrder.LOCAL,
+):
     '''Print statistics, either to stdout or the given file object.
 
     :type format: One of :class:`DisplayFormat.BY_*` constants
