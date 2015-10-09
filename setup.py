@@ -26,6 +26,7 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 3",
+        "Operating System :: Unix",
     ],
     install_requires=[
         'six>=1.5.0',
