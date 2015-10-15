@@ -312,13 +312,14 @@ def reset(frequency=None):
 
 
 @contextmanager
-def profile():
+def profile(verbose=True):
     start()
     try:
         yield
     finally:
         stop()
-        display()
+        if verbose:
+            display()
 
 
 ###########################################################################
