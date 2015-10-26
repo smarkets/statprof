@@ -148,6 +148,10 @@ timing its own code.
 Changelog
 ---------
 
+1.0.0
+`````
+* Added support for sorting by cumulative time to the display method
+
 0.2.0
 `````
 
